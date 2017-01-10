@@ -35,7 +35,7 @@ public class Opportunities {
                     //}
 
                     //This is my code for the first exercise
-                    if (bestPrice > 20.1000 && bestVolume > 0) {
+                    if (bestPrice > 20.10 && bestVolume > 0) {
                         myClient.createOrder(Symbol.of(BOOK), bestPrice, bestVolume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
                     }
                 }
@@ -51,7 +51,7 @@ public class Opportunities {
                     //}
 
                     //This is my code for the first exercise
-                    if (bestPrice < 19.9 && bestVolume > 0) {
+                    if (bestPrice < 19.90 && bestVolume > 0) {
                         myClient.createOrder(Symbol.of(BOOK), bestPrice, bestVolume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
                     }
                 }
