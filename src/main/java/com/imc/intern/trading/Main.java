@@ -1,32 +1,22 @@
 package com.imc.intern.trading;
 
 import com.imc.intern.exchange.client.ExchangeClient;
-import com.imc.intern.exchange.datamodel.Side;
-import com.imc.intern.exchange.datamodel.api.Account;
-import com.imc.intern.exchange.datamodel.api.OrderBookHandler;
-import com.imc.intern.exchange.datamodel.api.OrderType;
-import com.imc.intern.exchange.datamodel.api.RetailState;
-import com.imc.intern.exchange.datamodel.api.Symbol;
+import com.imc.intern.exchange.client.RemoteExchangeView;
+import com.imc.intern.exchange.datamodel.api.*;
 
 public class Main
 {
     private static final String EXCHANGE_URL = "tcp://wintern.imc.com:61616";
-    private static final String USERNAME = "";
-    private static final String PASSWORD = "";
-    private static final String BOOK = "";
+    private static final String USERNAME = "amehndir";
+    private static final String PASSWORD = "winter straw merely club";
+    private static final String BOOK = "AME1";
 
     public static void main(String[] args) throws Exception
     {
         ExchangeClient client = ExchangeClient.create(EXCHANGE_URL, Account.of(USERNAME), PASSWORD);
-        client.getExchangeView().subscribe(new OrderBookHandler() {
-            public void handleRetailState(RetailState retailState) {
-                System.out.println(retailState);
-            }
-        });
-
-        int price = 10;
-        int volume = 100;
+        RemoteExchangeView my_client = client.getExchangeView();
         client.start();
-        client.getExchangeView().createOrder(Symbol.of(BOOK), price, volume, OrderType.GOOD_TIL_CANCEL, Side.BUY);
+        ExchangeViewHandler ExchangeHandler = new ExchangeViewHandler(BOOK, my_client);
+        my_client.subscribe(Symbol.of(BOOK), ExchangeHandler);
     }
 }
