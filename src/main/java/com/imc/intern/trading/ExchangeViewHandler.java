@@ -50,7 +50,7 @@ public class ExchangeViewHandler implements OrderBookHandler {
         LOGGER.info(trade.toString());
         double price = trade.getPrice();
         int volume = trade.getVolume();
-        averagePrice = ((averagePrice * totalVolumeMoved) + price) / (volume + totalVolumeMoved);
+        averagePrice = ((averagePrice * totalVolumeMoved) + (price * volume)) / (volume + totalVolumeMoved);
         totalVolumeMoved += volume;
         LOGGER.info("Average Price:" + (averagePrice));
     }

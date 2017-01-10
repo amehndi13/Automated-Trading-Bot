@@ -14,11 +14,11 @@ public class ExchangeViewHandlerTest {
     @Test
     public void handleTradeTest() {
         testHandler.handleTrade(trade1);
-        assert testHandler.averagePrice == 1.0;
+        assert testHandler.averagePrice == 10;
         assert testHandler.totalVolumeMoved == 10;
 
         testHandler.handleTrade(trade2);
-        assert testHandler.averagePrice == 5.5;
+        assert testHandler.averagePrice == 55;
         assert testHandler.totalVolumeMoved == 20;
     }
 }
