@@ -34,7 +34,7 @@ public class Opportunities {
                     //my_client.createOrder(Symbol.of(BOOK), bestPrice, bestVolume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
                     //}
 
-                    //This is for the first exercise
+                    //This is my code for the first exercise
                     if (bestPrice > 20.1000 && bestVolume > 0) {
                         myClient.createOrder(Symbol.of(BOOK), bestPrice, bestVolume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
                     }
@@ -50,7 +50,7 @@ public class Opportunities {
                     //my_client.createOrder(Symbol.of(BOOK), bestPrice, bestVolume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
                     //}
 
-                    //This is for the first exercise
+                    //This is my code for the first exercise
                     if (bestPrice < 19.9 && bestVolume > 0) {
                         myClient.createOrder(Symbol.of(BOOK), bestPrice, bestVolume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
                     }
