@@ -13,6 +13,7 @@ import java.util.logging.Handler;
 
 
 public class ExchangeViewHandler implements OrderBookHandler {
+    // NAJ: typically, you want to keep members of a class private, and if you need access, to define getters/setters.
     double averagePrice = 20;
     int totalVolumeMoved = 0;
     int position = 0;
@@ -25,12 +26,18 @@ public class ExchangeViewHandler implements OrderBookHandler {
         this.myClient = client;
     }
 
+    // NAJ: typically would like to keep all members of a class defined in the same location. So LOGGER would be on the top of the class.
+    // NAJ: Usually organized from top of file down as: Static Final / Static / final / others / public methods / private methods
     private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
     @Override
     public void handleRetailState(RetailState retailState) {
         LOGGER.info(retailState.toString());
 
+        // NAJ: It seems like a cleaner line of thought here would be to extract opportunities through some type of opportunity checker,
+        // NAJ: and then place orders based on opportunities through some sort of order placer.
+        // NAJ: This makes it cleaner then to pass in this checker and placer as separate members of this handler/
+        // NAJ: Makes testing easier as you can mock interactions with checker/placer.
         List<RetailState.Level> bids = retailState.getBids();
         Opportunities buys = new Opportunities(bids, BOOK, myClient);
         buys.checkOpportunity(Side.SELL);
@@ -47,6 +54,7 @@ public class ExchangeViewHandler implements OrderBookHandler {
 
     @Override
     public void handleTrade(Trade trade) {
+        // NAJ: This seems like a nice single responsibility for its own class to handle average prices and volume ticker
         LOGGER.info(trade.toString());
         double price = trade.getPrice();
         int volume = trade.getVolume();
@@ -57,6 +65,7 @@ public class ExchangeViewHandler implements OrderBookHandler {
 
     @Override
     public void handleOwnTrade(OwnTrade trade) {
+        // NAJ: Ditto on another class here to handle/track positions
         LOGGER.info(trade.toString());
         if (trade.getSide() == Side.BUY) {
             position += trade.getVolume();
@@ -66,4 +75,6 @@ public class ExchangeViewHandler implements OrderBookHandler {
         LOGGER.info("Position:" + position);
         myTrades.add(trade);
     }
+
+    // NAJ: Errors get no love?
 }

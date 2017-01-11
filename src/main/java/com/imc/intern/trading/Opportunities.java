@@ -10,6 +10,7 @@ import java.util.List;
 
 public class Opportunities {
 
+    // NAJ: similar comments of fields as in Handler
     List<RetailState.Level> levels;
     String BOOK;
     RemoteExchangeView myClient;
@@ -19,12 +20,15 @@ public class Opportunities {
         this.myClient = myClient;
     }
 
+    // NAJ: I would pass in levels as a parameter rather than a field
     public void checkOpportunity(Side side) {
         double bestPrice;
         int bestVolume;
+        // NAJ: using the implied iterator pattern simplify this code as an empty list would not go into the loop;
+        // NAJ: for (RetailState.Level myLevel : levels){}
         if (!this.levels.isEmpty()) {
             if (side == Side.SELL) {
-                for (RetailState.Level level : this.levels) {
+                for (RetailState.Level level : this.levels) { // NAJ: don't need to use the "this.*" notation.
                     bestPrice = level.getPrice();
                     bestVolume = level.getVolume();
                     double pricePerShare = bestPrice / bestVolume;

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+// NAJ: Moved this over for you. Typically you want to keep your test code separate from production.
 public class ExchangeViewHandlerTest {
 
     ExchangeViewHandler testHandler = new ExchangeViewHandler(null, null);

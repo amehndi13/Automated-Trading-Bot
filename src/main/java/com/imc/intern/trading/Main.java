@@ -13,6 +13,10 @@ public class Main
 
     public static void main(String[] args) throws Exception
     {
+        // NAJ: overall great improvement from 1on1, keep up the good work.
+        // NAJ: focus on object-oriented design, and think about classes/objects in that frame of mind.
+        // NAJ: e.g. how do I want to interact with positions, how to I want opportunities to be traded on, where should my valuation logic be contained?
+        // NAJ: remember S.O.L.I.D, let me know if you're unfamiliar with this: "https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)"
         ExchangeClient client = ExchangeClient.create(EXCHANGE_URL, Account.of(USERNAME), PASSWORD);
         RemoteExchangeView my_client = client.getExchangeView();
         client.start();
