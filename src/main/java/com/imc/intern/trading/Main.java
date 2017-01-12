@@ -2,6 +2,7 @@ package com.imc.intern.trading;
 
 import com.imc.intern.exchange.client.ExchangeClient;
 import com.imc.intern.exchange.client.RemoteExchangeView;
+import com.imc.intern.exchange.datamodel.Side;
 import com.imc.intern.exchange.datamodel.api.*;
 
 public class Main {

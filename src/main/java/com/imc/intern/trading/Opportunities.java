@@ -13,7 +13,6 @@ public class Opportunities {
     private Book tacoBook;
     private Book beefBook;
     private Book tortBook;
-    private int counter = 0;
 
     public Opportunities(RemoteExchangeView myClient, Book tacoBook, Book beefBook, Book tortBook) {
         this.myClient = myClient;
@@ -42,16 +41,29 @@ public class Opportunities {
         Arrays.sort(volumes1);
         Arrays.sort(volumes2);
         // Taco, Beef, Tort Arbitrage
-        if (bestTacoBookBids > bestBeefBookAsks + bestTortBookAsks && counter%2 == 0) {
-            myClient.createOrder(Symbol.of("TACO"), bestTacoBookBids, (volumes1[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
-            myClient.createOrder(Symbol.of("TORT"), bestTortBookAsks, (volumes1[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
-            myClient.createOrder(Symbol.of("BEEF"), bestBeefBookAsks, (volumes1[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
-            TimeUnit.SECONDS.sleep(1);
-        } else if (bestTacoBookAsks < bestBeefBookBids + bestTortBookBids && counter%2 == 1) {
-            myClient.createOrder(Symbol.of("TACO"), bestTacoBookAsks, (volumes2[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
-            myClient.createOrder(Symbol.of("TORT"), bestTortBookBids, (volumes2[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
-            myClient.createOrder(Symbol.of("BEEF"), bestBeefBookBids, (volumes2[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
-            TimeUnit.SECONDS.sleep(1);
+        if (bestTacoBookBids > bestBeefBookAsks + bestTortBookAsks) {
+            int volume = volumes1[0]%10 == 0 ? 50 : volumes1[0]%100;
+            myClient.createOrder(Symbol.of("TACO"), bestTacoBookBids, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
+            myClient.createOrder(Symbol.of("TORT"), bestTortBookAsks, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
+            myClient.createOrder(Symbol.of("BEEF"), bestBeefBookAsks, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
+            TimeUnit.SECONDS.sleep(35);
+        } else if (bestTacoBookAsks < bestBeefBookBids + bestTortBookBids) {
+            int volume = volumes2[0]%100 == 0 ? 50 : volumes2[0]%100;
+            myClient.createOrder(Symbol.of("TACO"), bestTacoBookAsks, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
+            myClient.createOrder(Symbol.of("TORT"), bestTortBookBids, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
+            myClient.createOrder(Symbol.of("BEEF"), bestBeefBookBids, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
+            TimeUnit.SECONDS.sleep(35);
         }
+    }
+
+    public void flattenOut(PositionHandler positionHandler, ValuationHandler valuationHandler) {
+        int position = positionHandler.getPosition();
+        Side side;
+        if (position < 0) {
+            side = Side.BUY;
+        } else {
+            side = Side.SELL;
+        }
+        myClient.createOrder(Symbol.of(positionHandler.getBook()), valuationHandler.getCurrentValue(), position, OrderType.GOOD_TIL_CANCEL, side);
     }
 }

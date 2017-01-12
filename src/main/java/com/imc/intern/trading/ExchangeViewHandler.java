@@ -14,7 +14,7 @@ public class ExchangeViewHandler implements OrderBookHandler {
     private String BOOK;
     private Opportunities opportunities;
     private ValuationHandler valuationHandler = new ValuationHandler();
-    private PositionHandler positionHandler = new PositionHandler();
+    private PositionHandler positionHandler = new PositionHandler(BOOK);
 
     public ExchangeViewHandler(String BOOK, Book Book, Opportunities opportunities) {
         this.Book = Book;
@@ -54,6 +54,9 @@ public class ExchangeViewHandler implements OrderBookHandler {
         LOGGER.info(trade.toString());
         positionHandler.updatePosition(trade);
         LOGGER.info("Position for " + BOOK + ": " + positionHandler.getPosition());
+        if (positionHandler.getPosition() > 200 || positionHandler.getPosition() < -200) {
+            opportunities.flattenOut(positionHandler, valuationHandler);
+        }
     }
 
     @Override

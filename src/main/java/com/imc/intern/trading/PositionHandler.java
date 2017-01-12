@@ -6,6 +6,11 @@ import com.imc.intern.exchange.datamodel.api.OwnTrade;
 public class PositionHandler {
     private int position = 0;
     private int offset = 0;
+    private String BOOK;
+
+    public PositionHandler(String BOOK) {
+        this.BOOK = BOOK;
+    }
 
     public void updatePosition(OwnTrade trade) {
         if (trade.getSide() == Side.BUY) {
@@ -32,5 +37,9 @@ public class PositionHandler {
 
     public int getOffset() {
         return offset;
+    }
+
+    public String getBook() {
+        return BOOK;
     }
 }
