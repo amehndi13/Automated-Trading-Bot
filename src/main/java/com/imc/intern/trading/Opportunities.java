@@ -3,55 +3,55 @@ package com.imc.intern.trading;
 import com.imc.intern.exchange.client.RemoteExchangeView;
 import com.imc.intern.exchange.datamodel.Side;
 import com.imc.intern.exchange.datamodel.api.OrderType;
-import com.imc.intern.exchange.datamodel.api.RetailState;
 import com.imc.intern.exchange.datamodel.api.Symbol;
+
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class Opportunities {
     private RemoteExchangeView myClient;
-    private Book tacoBook = new Book();
-    private Book beefBook = new Book();
-    private Book tortBook = new Book();
-    private boolean tacoBookUpdated = false;
-    private boolean beefBookUpdated = false;
-    private boolean tortBookUpdated = false;
+    private Book tacoBook;
+    private Book beefBook;
+    private Book tortBook;
+    private int counter = 0;
 
-    public Opportunities(RemoteExchangeView myClient) {
+    public Opportunities(RemoteExchangeView myClient, Book tacoBook, Book beefBook, Book tortBook) {
         this.myClient = myClient;
+        this.tortBook = tortBook;
+        this.beefBook = beefBook;
+        this.tacoBook = tacoBook;
     }
 
-    public void checkOpportunities(RetailState retailState, String BOOK) {
-        if (tacoBookUpdated && beefBookUpdated && tortBookUpdated) { //cproctor: I think that this will always be false.
-            updateBooks(retailState, BOOK);
-            double bestTacoBookAsks = tacoBook.getAsks().firstKey();
-            double bestTacoBookBids = tacoBook.getBids().lastKey();
-            double bestBeefBookAsks = beefBook.getAsks().firstKey();
-            double bestBeefBookBids = beefBook.getBids().lastKey();
-            double bestTortBookAsks = tortBook.getAsks().firstKey();
-            double bestTortBookBids = tortBook.getBids().lastKey();
+    public void checkOpportunities() throws InterruptedException {
+        double bestTacoBookAsks = tacoBook.getAsks().firstKey();
+        double bestTacoBookBids = tacoBook.getBids().lastKey();
+        double bestBeefBookAsks = beefBook.getAsks().firstKey();
+        double bestBeefBookBids = beefBook.getBids().lastKey();
+        double bestTortBookAsks = tortBook.getAsks().firstKey();
+        double bestTortBookBids = tortBook.getBids().lastKey();
+        int[] volumes1 = new int[3];
+        int[] volumes2 = new int[3];
 
-            if (bestTacoBookBids > bestBeefBookAsks + bestTortBookAsks) {
-                myClient.createOrder(Symbol.of("TACO"), bestTacoBookBids, tacoBook.getBids().get(bestTacoBookBids), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
-            } else if (bestTacoBookAsks < bestBeefBookBids + bestTortBookBids) {
-                myClient.createOrder(Symbol.of("TACO"), bestTacoBookAsks, tacoBook.getAsks().get(bestTacoBookAsks), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
-            }
-        }
-    }
+        volumes1[0] = tacoBook.getBids().get(bestTacoBookBids);
+        volumes2[0] = tacoBook.getAsks().get(bestTacoBookAsks);
+        volumes2[1] = beefBook.getBids().get(bestBeefBookBids);
+        volumes1[1] = beefBook.getAsks().get(bestBeefBookAsks);
+        volumes2[2] = tortBook.getBids().get(bestTortBookBids);
+        volumes1[2] = tortBook.getAsks().get(bestTortBookAsks);
 
-    /*
-        cproctor: I like that these are two separate methods, but I think that the update should happen directly from
-        the handler to the Book. That way you no longer have to filter based on book because the handlers are already
-        per book.
-     */
-    public void updateBooks(RetailState retailState, String BOOK) {
-        if (BOOK.equals("TACO")) {
-            tacoBook.updateBook(retailState);
-            tacoBookUpdated = true;
-        } else if (BOOK.equals("BEEF")) {
-            beefBook.updateBook(retailState);
-            beefBookUpdated = true;
-        } else if (BOOK.equals("TORT")) {
-            tortBook.updateBook(retailState);
-            tortBookUpdated = true;
+        Arrays.sort(volumes1);
+        Arrays.sort(volumes2);
+        // Taco, Beef, Tort Arbitrage
+        if (bestTacoBookBids > bestBeefBookAsks + bestTortBookAsks && counter%2 == 0) {
+            myClient.createOrder(Symbol.of("TACO"), bestTacoBookBids, (volumes1[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
+            myClient.createOrder(Symbol.of("TORT"), bestTortBookAsks, (volumes1[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
+            myClient.createOrder(Symbol.of("BEEF"), bestBeefBookAsks, (volumes1[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
+            TimeUnit.SECONDS.sleep(1);
+        } else if (bestTacoBookAsks < bestBeefBookBids + bestTortBookBids && counter%2 == 1) {
+            myClient.createOrder(Symbol.of("TACO"), bestTacoBookAsks, (volumes2[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
+            myClient.createOrder(Symbol.of("TORT"), bestTortBookBids, (volumes2[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
+            myClient.createOrder(Symbol.of("BEEF"), bestBeefBookBids, (volumes2[0] % 10), OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
+            TimeUnit.SECONDS.sleep(1);
         }
     }
 }

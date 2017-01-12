@@ -7,6 +7,11 @@ import java.util.TreeMap;
 public class Book {
     private TreeMap<Double, Integer> bids = new TreeMap<>();
     private TreeMap<Double, Integer> asks = new TreeMap<>();
+    private String BOOK;
+
+    public Book(String BOOK) {
+        this.BOOK = BOOK;
+    }
 
     public void updateBook(RetailState retailState) {
         for (RetailState.Level level : retailState.getBids()) {
@@ -24,6 +29,8 @@ public class Book {
                 bids.remove(level.getPrice());
             }
         }
+        System.out.println(bids.lastKey());
+        System.out.println(asks.firstKey());
     }
 
     public TreeMap<Double, Integer> getBids() {
