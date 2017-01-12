@@ -11,6 +11,9 @@ public class ExchangeViewHandlerTest {
     Trade trade1 = new Trade(null, 10, 10, 0);
     Trade trade2 = new Trade(null, 100, 10, 0);
 
+    /*
+        cproctor: Let me know if you'd like to get a test set up today and we can work on it together!
+     */
     @Test
     public void handleTradeTest() {
         assert true;

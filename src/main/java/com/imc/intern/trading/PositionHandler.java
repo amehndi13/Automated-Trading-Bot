@@ -11,6 +11,9 @@ public class PositionHandler {
     private int offsetBEEF = 0;
     private int offsetTORT = 0;
 
+    /*
+        cproctor: If you create a PositionManager per book, you remove the filtering here too!
+     */
     public void updatePosition(OwnTrade trade, String BOOK) {
         if (BOOK == "TACO") {
             if (trade.getSide() == Side.BUY) {

@@ -29,6 +29,13 @@ public class ExchangeViewHandler implements OrderBookHandler {
     @Override
     public void handleRetailState(RetailState retailState) {
         LOGGER.info(retailState.toString());
+        /*
+            cproctor: Do you really want to create a new Opportunities for each retail state update that you get?
+             In doing so, you create a new object, which creates new Books inside it. These books don't have the state.
+             Instead, you probably want to create the Books in your main and pass each book to its respective
+             ExchangeViewHandler. You can then create one Opportunities in your main and pass those same books to it as
+             parameters.
+         */
         Opportunities opportunities = new Opportunities(myClient);
         opportunities.checkOpportunities(retailState, BOOK);
     }
