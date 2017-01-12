@@ -20,7 +20,7 @@ public class Opportunities {
     }
 
     public void checkOpportunities(RetailState retailState, String BOOK) {
-        if (tacoBookUpdated && beefBookUpdated && tortBookUpdated) {
+        if (tacoBookUpdated && beefBookUpdated && tortBookUpdated) { //cproctor: I think that this will always be false.
             updateBooks(retailState, BOOK);
             double bestTacoBookAsks = tacoBook.getAsks().firstKey();
             double bestTacoBookBids = tacoBook.getBids().lastKey();
@@ -37,6 +37,11 @@ public class Opportunities {
         }
     }
 
+    /*
+        cproctor: I like that these are two separate methods, but I think that the update should happen directly from
+        the handler to the Book. That way you no longer have to filter based on book because the handlers are already
+        per book.
+     */
     public void updateBooks(RetailState retailState, String BOOK) {
         if (BOOK.equals("TACO")) {
             tacoBook.updateBook(retailState);
