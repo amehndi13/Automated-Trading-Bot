@@ -1,7 +1,6 @@
 package com.imc.intern.trading;
 
 import com.imc.intern.exchange.client.RemoteExchangeView;
-import com.imc.intern.exchange.datamodel.Side;
 import com.imc.intern.exchange.datamodel.api.*;
 import com.imc.intern.exchange.datamodel.api.Error;
 import com.imc.intern.exchange.datamodel.jms.ExposureUpdate;
