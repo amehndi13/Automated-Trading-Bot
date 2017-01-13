@@ -21,6 +21,7 @@ public class PositionHandler {
         updateOffset();
     }
 
+    // msanders: let's turn this magic number into a constant
     public void updateOffset() {
         if (position < 30) {
             //should be negative once actually calculated

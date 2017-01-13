@@ -14,6 +14,7 @@ public class ValuationHandler {
         totalVolumeMoved += volume;
     }
 
+    // msanders: this is kinda neat, even if it's currently only used for informational purposes!
     public double getMovingAverage() {
         return movingAverage;
     }
