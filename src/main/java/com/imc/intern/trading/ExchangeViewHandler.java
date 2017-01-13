@@ -14,12 +14,14 @@ public class ExchangeViewHandler implements OrderBookHandler {
     private String BOOK;
     private Opportunities opportunities;
     private ValuationHandler valuationHandler = new ValuationHandler();
-    private PositionHandler positionHandler = new PositionHandler(BOOK);
+    private PositionTracker positionTracker;
+    private boolean needToFlatten = false;
 
-    public ExchangeViewHandler(String BOOK, Book Book, Opportunities opportunities) {
+    public ExchangeViewHandler(String BOOK, Book Book, Opportunities opportunities, PositionTracker positionTracker) {
         this.Book = Book;
         this.BOOK = BOOK;
         this.opportunities = opportunities;
+        this.positionTracker = positionTracker;
     }
 
     @Override
@@ -27,7 +29,9 @@ public class ExchangeViewHandler implements OrderBookHandler {
         LOGGER.info(retailState.toString());
         Book.updateBook(retailState);
         try {
-            opportunities.checkOpportunities();
+            if (!needToFlatten) {
+                opportunities.checkOpportunities();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -52,10 +56,19 @@ public class ExchangeViewHandler implements OrderBookHandler {
     @Override
     public void handleOwnTrade(OwnTrade trade) {
         LOGGER.info(trade.toString());
-        positionHandler.updatePosition(trade);
-        LOGGER.info("Position for " + BOOK + ": " + positionHandler.getPosition());
-        if (positionHandler.getPosition() > 200 || positionHandler.getPosition() < -200) {
-            opportunities.flattenOut(positionHandler, valuationHandler);
+        int beef = 0;
+        int tort = 1;
+        if (positionTracker.getBeefPosition() != 0) {
+            System.out.println("FLATTENING!!!!");
+            opportunities.flattenOut(positionTracker, valuationHandler, beef);
+            needToFlatten = true;
+        } else if (positionTracker.getTortPosition() != 0) {
+            System.out.println("FLATTENING!!!!");
+            opportunities.flattenOut(positionTracker, valuationHandler, tort);
+            needToFlatten = true;
+        } else if (positionTracker.getBeefPosition() == 0 && positionTracker.getBeefPosition() == 0) {
+            System.out.println("DONE FLATTENING!!!!");
+            needToFlatten = false;
         }
     }
 

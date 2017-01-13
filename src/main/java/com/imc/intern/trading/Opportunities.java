@@ -5,14 +5,12 @@ import com.imc.intern.exchange.datamodel.Side;
 import com.imc.intern.exchange.datamodel.api.OrderType;
 import com.imc.intern.exchange.datamodel.api.Symbol;
 
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
 public class Opportunities {
     private RemoteExchangeView myClient;
     private Book tacoBook;
     private Book beefBook;
     private Book tortBook;
+    private long timeOfLastTrade;
 
     public Opportunities(RemoteExchangeView myClient, Book tacoBook, Book beefBook, Book tortBook) {
         this.myClient = myClient;
@@ -29,44 +27,64 @@ public class Opportunities {
         double bestTortBookAsks = tortBook.getAsks().firstKey();
         double bestTortBookBids = tortBook.getBids().lastKey();
 
-        // msanders: it's probably easier to use a regular list here instead of an array
-        int[] volumes1 = new int[3];
-        int[] volumes2 = new int[3];
+        int sellTacoVolume = minOfThree(tacoBook.getBids().get(bestTacoBookBids), beefBook.getAsks().get(bestBeefBookAsks), tortBook.getAsks().get(bestTortBookAsks));
+        int buyTacoVolume = minOfThree(tacoBook.getAsks().get(bestTacoBookAsks), beefBook.getBids().get(bestBeefBookBids),tortBook.getBids().get(bestTortBookBids));
 
-        volumes1[0] = tacoBook.getBids().get(bestTacoBookBids); // msanders: this naming is confusing -- it seems that you're
-        volumes2[0] = tacoBook.getAsks().get(bestTacoBookAsks); // using this array to store something like a tuple of prices and
-        volumes2[1] = beefBook.getBids().get(bestBeefBookBids); // volumes -- why not make a small class to hold the three values
-        volumes1[1] = beefBook.getAsks().get(bestBeefBookAsks); // instead?
-        volumes2[2] = tortBook.getBids().get(bestTortBookBids);
-        volumes1[2] = tortBook.getAsks().get(bestTortBookAsks);
-
-        Arrays.sort(volumes1);
-        Arrays.sort(volumes2);
         // Taco, Beef, Tort Arbitrage
         if (bestTacoBookBids > bestBeefBookAsks + bestTortBookAsks) {
-            // msanders: this logic is a bit confusing also -- let's chat a bit tomorrow about what's going on here
-            int volume = volumes1[0]%10 == 0 ? 50 : volumes1[0]%100;
+            int volume = limitVolume(sellTacoVolume, 100);
+            if (System.currentTimeMillis() - timeOfLastTrade < 10000) {
+                return;
+            }
             myClient.createOrder(Symbol.of("TACO"), bestTacoBookBids, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
             myClient.createOrder(Symbol.of("TORT"), bestTortBookAsks, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
             myClient.createOrder(Symbol.of("BEEF"), bestBeefBookAsks, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
-            TimeUnit.SECONDS.sleep(35);
+            timeOfLastTrade = System.currentTimeMillis();
         } else if (bestTacoBookAsks < bestBeefBookBids + bestTortBookBids) {
-            int volume = volumes2[0]%100 == 0 ? 50 : volumes2[0]%100;
+            int volume = limitVolume(buyTacoVolume, 100);
+            if (System.currentTimeMillis() - timeOfLastTrade < 10000) {
+                return;
+            }
             myClient.createOrder(Symbol.of("TACO"), bestTacoBookAsks, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.BUY);
             myClient.createOrder(Symbol.of("TORT"), bestTortBookBids, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
             myClient.createOrder(Symbol.of("BEEF"), bestBeefBookBids, volume, OrderType.IMMEDIATE_OR_CANCEL, Side.SELL);
-            TimeUnit.SECONDS.sleep(35);
+            timeOfLastTrade = System.currentTimeMillis();
         }
     }
 
-    public void flattenOut(PositionHandler positionHandler, ValuationHandler valuationHandler) {
-        int position = positionHandler.getPosition();
-        Side side;
-        if (position < 0) {
-            side = Side.BUY;
+    public int minOfThree(int a, int b, int c) {
+        return Math.min(Math.min(a, b), c);
+    }
+
+    public int limitVolume(int volume, int limit) {
+        return Math.min(volume, limit);
+    }
+
+    public void flattenOut(PositionTracker positionTracker, ValuationHandler valuationHandler, int beefOrTort) {
+        if (beefOrTort == 0) {
+            int position = positionTracker.getBeefPosition();
+            Side side;
+            if (position < 0) {
+                side = Side.BUY;
+            } else {
+                side = Side.SELL;
+            }
+            System.out.println("sending good till cancel");
+            double price = ((double) (long) (valuationHandler.getCurrentValue() * 20 + 0.5)) / 20;
+            System.out.println("price of good till cancel is: " + price);
+            myClient.createOrder(Symbol.of("BEEF"), price, position, OrderType.GOOD_TIL_CANCEL, side);
         } else {
-            side = Side.SELL;
+            int position = positionTracker.getTortPosition();
+            Side side;
+            if (position < 0) {
+                side = Side.BUY;
+            } else {
+                side = Side.SELL;
+            }
+            double price = ((double) (long) (valuationHandler.getCurrentValue() * 20 + 0.5)) / 20;
+            System.out.println("price of good till cancel is: " + price);
+            myClient.createOrder(Symbol.of("TORT"), price, position, OrderType.GOOD_TIL_CANCEL, side);
+            System.out.println("sending good till cancel");
         }
-        myClient.createOrder(Symbol.of(positionHandler.getBook()), valuationHandler.getCurrentValue(), position, OrderType.GOOD_TIL_CANCEL, side);
     }
 }
